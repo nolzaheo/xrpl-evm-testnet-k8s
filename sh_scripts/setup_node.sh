@@ -1,22 +1,26 @@
-#도커 이미지 풀
+# 도커 이미지 풀
 $ docker pull peersyst/exrp:latest
 
-# 필요한 패키지 설치(스냅샷)
-sudo apt-get install -y wget lz4
+# 필요한 패키지 설치
+sudo apt-get install -y wget lz4 curl grep sed
 
-# 옵션: snapshot
-# https://polkachu.com/testnets/xrp/snapshots
-# 매 번 확인 후 반영해야 함
-$ wget -O xrp_1364071.tar.lz4 https://snapshots.polkachu.com/testnet-snapshots/xrp/xrp_1364071.tar.lz4 --inet4-only
+# 스냅샷 다운로드 스크립트 실행
+chmod +x ./sh_scripts/download_snapshot.sh
+./sh_scripts/download_snapshot.sh
 
-#node data 저장을 위한 디렉토리 생성
+# 스냅샷 파일 이름 가져오기 (download_snapshot.sh에서 다운로드한 가장 최신 파일)
+SNAPSHOT_FILE=$(ls -t xrp_*.tar.lz4 | head -1)
+
+# node data 저장을 위한 디렉토리 생성
 $ mkdir -p /home/$(whoami)/.exrpd
 
-$ lz4 -c -d xrp_1364071.tar.lz4  | tar -x -C $HOME/.exrpd
+# 스냅샷 압축 해제 및 데이터 디렉토리로 이동
+$ lz4 -c -d $SNAPSHOT_FILE | tar -x -C $HOME/.exrpd
 
-$ rm -v xrp_1364071.tar.lz4
+# 다운로드 받은 스냅샷 파일 삭제
+$ rm -v $SNAPSHOT_FILE
 
-#컨테이너 실행 및 내부 접속
+# 컨테이너 실행 및 내부 접속
 $ docker run -it --name xrplevm-setup \
   -v /home/$(whoami)/.exrpd:/root/.exrpd \
   -e DAEMON_NAME=exrpd \
