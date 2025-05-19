@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: xrplevm-node
+spec:
+  serviceName: xrplevm-node
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xrplevm-node
+  template:
+    metadata:
+      labels:
+        app: xrplevm-node
+    spec:
+      containers:
+      - name: xrplevm-node
+        image: peersyst/exrp:latest
+        imagePullPolicy: IfNotPresent
+        command: ["exrpd", "start"]
+        ports:
+        - containerPort: 26656  # P2P
+          name: p2p
+        - containerPort: 26657  # RPC
+          name: rpc
+        - containerPort: 1317   # REST
+          name: rest
+        - containerPort: 8545   # EVM RPC
+          name: evm
+        env:
+        - name: DAEMON_NAME
+          value: "exrpd"
+        - name: DAEMON_HOME
+          value: "/root/.exrpd"
+        resources:
+          requests:
+            cpu: "2"
+            memory: "8Gi"
+          limits:
+            cpu: "4"
+            memory: "16Gi"
+        volumeMounts:
+        - name: data
+          mountPath: /root/.exrpd
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 26657
+          initialDelaySeconds: 300
+          periodSeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 26657
+          initialDelaySeconds: 60
+          periodSeconds: 10
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: xrplevm-data
