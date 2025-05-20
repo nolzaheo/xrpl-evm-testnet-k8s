@@ -42,18 +42,8 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /root/.exrpd
-        livenessProbe:
-          httpGet:
-            path: /status
-            port: 26657
-          initialDelaySeconds: 300
-          periodSeconds: 60
-        readinessProbe:
-          httpGet:
-            path: /status
-            port: 26657
-          initialDelaySeconds: 60
-          periodSeconds: 10
+        # livenessProbe: null
+        # readinessProbe: null
       volumes:
       - name: data
         hostPath:
