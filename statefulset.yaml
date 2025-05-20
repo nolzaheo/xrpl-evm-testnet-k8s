@@ -17,7 +17,7 @@ spec:
       - name: xrplevm-node
         image: peersyst/exrp:latest
         imagePullPolicy: IfNotPresent
-        command: ["exrpd", "start"]
+        command: ["exrpd", "start", "--minimum-gas-prices=0axrp"]
         ports:
         - containerPort: 26656  # P2P
           name: p2p
