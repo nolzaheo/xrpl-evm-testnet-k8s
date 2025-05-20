@@ -18,4 +18,4 @@ spec:
   - name: evm
     port: 8545
     targetPort: 8545
-  type: LoadBalancer  # 또는 NodePort
+  type: LoadBalancer

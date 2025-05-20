@@ -34,11 +34,11 @@ spec:
           value: "/root/.exrpd"
         resources:
           requests:
+            cpu: "1"
+            memory: "4Gi"
+          limits:
             cpu: "2"
             memory: "8Gi"
-          limits:
-            cpu: "4"
-            memory: "16Gi"
         volumeMounts:
         - name: data
           mountPath: /root/.exrpd
@@ -57,5 +57,5 @@ spec:
       volumes:
       - name: data
         hostPath:
-          path: /home/anam145/.exrpd
+          path: /hosthome/.exrpd  # Minikube에 마운트된 경로
           type: Directory
