@@ -41,6 +41,54 @@ wget -O /root/.exrpd/config/genesis.json https://raw.githubusercontent.com/xrple
 PEERS=$(curl -sL https://raw.githubusercontent.com/xrplevm/networks/main/testnet/peers.txt | sort -R | head -n 10 | awk '{print $1}' | paste -s -d,)
 sed -i.bak -e "s/^seeds *=.*/seeds = \"$PEERS\"/" /root/.exrpd/config/config.toml
 
+# RPC 및 API 주소 변경
+# config.toml에서 RPC 주소를 0.0.0.0으로 변경
+sed -i 's|^laddr = "tcp://127.0.0.1:26657"|laddr = "tcp://0.0.0.0:26657"|' /root/.exrpd/config/config.toml
+
+# app.toml 설정 변경 (파일이 이미 존재하는 경우)
+if [ -f "/root/.exrpd/config/app.toml" ]; then
+  # API 주소 변경
+  sed -i 's|address = "tcp://127.0.0.1:1317"|address = "tcp://0.0.0.0:1317"|' /root/.exrpd/config/app.toml
+  
+  # JSON-RPC 주소 변경
+  sed -i 's|address = "127.0.0.1:8545"|address = "0.0.0.0:8545"|' /root/.exrpd/config/app.toml
+  sed -i 's|ws-address = "127.0.0.1:8546"|ws-address = "0.0.0.0:8546"|' /root/.exrpd/config/app.toml
+  
+  # minimum-gas-prices 설정 (아직 설정되지 않은 경우)
+  if ! grep -q "^minimum-gas-prices =" /root/.exrpd/config/app.toml; then
+    sed -i '1s/^/minimum-gas-prices = "0axrp"\n/' /root/.exrpd/config/app.toml
+  fi
+else
+  # app.toml이 없는 경우 새로 생성
+  cat > /root/.exrpd/config/app.toml << EOL
+minimum-gas-prices = "0axrp"
+
+[api]
+enable = true
+swagger = true
+address = "tcp://0.0.0.0:1317"
+
+[json-rpc]
+enable = true
+address = "0.0.0.0:8545"
+ws-address = "0.0.0.0:8546"
+api = "eth,net,web3,txpool"
+
+[telemetry]
+enable = false
+EOL
+fi
+
+# 변경 사항 확인
+echo "확인: RPC 설정"
+grep -n "laddr" /root/.exrpd/config/config.toml | grep "26657"
+
+echo "확인: API 및 JSON-RPC 설정"
+if [ -f "/root/.exrpd/config/app.toml" ]; then
+  grep -n "address" /root/.exrpd/config/app.toml
+  grep -n "minimum-gas-prices" /root/.exrpd/config/app.toml
+fi
+
 # 밸리데이터 키 생성 (file 백엔드 사용)
 exrpd keys add anam145_validator_key_tmp --key-type eth_secp256k1 --keyring-backend file
 
