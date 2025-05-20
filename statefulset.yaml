@@ -17,7 +17,7 @@ spec:
       - name: xrplevm-node
         image: peersyst/exrp:latest
         imagePullPolicy: IfNotPresent
-        command: ["exrpd", "start", "--minimum-gas-prices=0axrp"]
+        command: ["exrpd", "start"]
         ports:
         - containerPort: 26656  # P2P
           name: p2p
@@ -56,5 +56,6 @@ spec:
           periodSeconds: 10
       volumes:
       - name: data
-        persistentVolumeClaim:
-          claimName: xrplevm-data
+        hostPath:
+          path: /home/anam145/.exrpd
+          type: Directory
